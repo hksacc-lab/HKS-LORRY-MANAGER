@@ -1,20 +1,35 @@
-.gitignore
-.env.example
-package.json
-tsconfig.json
-next.config.mjs
-tailwind.config.ts
-postcss.config.mjs
-public/manifest.json
-src/lib/supabase.ts
-src/lib/db-types.ts
-src/lib/utils.ts
-src/hooks/useAuth.ts
-src/styles/globals.css
-src/app/layout.tsx
-src/app/page.tsx
-src/app/auth/callback/route.ts
-src/app/dashboard/layout.tsx
-src/app/dashboard/page.tsx
-README.md
-database-setup.sql
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
