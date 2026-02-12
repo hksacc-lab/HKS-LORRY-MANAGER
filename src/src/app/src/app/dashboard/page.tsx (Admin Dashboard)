@@ -1,0 +1,125 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase'
+import { Truck, Users, Package, AlertTriangle } from 'lucide-react'
+
+interface DashboardStats {
+  totalVehicles: number
+  activeTrips: number
+  totalDrivers: number
+  maintenanceAlerts: number
+}
+
+export default function Dashboard() {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalVehicles: 0,
+    activeTrips: 0,
+    totalDrivers: 0,
+    maintenanceAlerts: 0,
+  })
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [vehicles, trips, drivers, maintenance] = await Promise.all([
+          supabase.from('vehicles').select('id', { count: 'exact' }),
+          supabase.from('trips').select('id', { count: 'exact' }).eq('status', 'in_progress'),
+          supabase.from('drivers').select('id', { count: 'exact' }).eq('is_active', true),
+          supabase.from('maintenance').select('id', { count: 'exact' }).eq('status', 'pending'),
+        ])
+
+        setStats({
+          totalVehicles: vehicles.count || 0,
+          activeTrips: trips.count || 0,
+          totalDrivers: drivers.count || 0,
+          maintenanceAlerts: maintenance.count || 0,
+        })
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [supabase])
+
+  const StatCard = ({ icon: Icon, label, value, color }: any) => (
+    <div className="card p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-600 text-sm mb-1">{label}</p>
+          <p className="text-3xl font-bold text-gray-900">{value}</p>
+        </div>
+        <div className={`p-3 rounded-lg ${color}`}>
+          <Icon size={24} className="text-white" />
+        </div>
+      </div>
+    </div>
+  )
+
+  if (loading) {
+    return <div className="text-center py-12">Loading...</div>
+  }
+
+  return (
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Welcome Back!</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatCard
+          icon={Truck}
+          label="Total Lorries"
+          value={stats.totalVehicles}
+          color="bg-blue-500"
+        />
+        <StatCard
+          icon={Package}
+          label="Active Trips"
+          value={stats.activeTrips}
+          color="bg-green-500"
+        />
+        <StatCard
+          icon={Users}
+          label="Active Drivers"
+          value={stats.totalDrivers}
+          color="bg-purple-500"
+        />
+        <StatCard
+          icon={AlertTriangle}
+          label="Maintenance Alerts"
+          value={stats.maintenanceAlerts}
+          color="bg-amber-500"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="card p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <div className="space-y-3">
+            <button className="btn-primary w-full">Create New Trip</button>
+            <button className="btn-secondary w-full">Assign Driver</button>
+            <button className="btn-ghost w-full">View All Vehicles</button>
+          </div>
+        </div>
+
+        <div className="card p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Alerts</h3>
+          <div className="space-y-3">
+            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <p className="text-sm font-medium text-amber-900">Oil change due</p>
+              <p className="text-xs text-amber-700">Lorry PLK-001 in 500 km</p>
+            </div>
+            <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+              <p className="text-sm font-medium text-red-900">Insurance expired</p>
+              <p className="text-xs text-red-700">Lorry PLK-005 expires tomorrow</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
